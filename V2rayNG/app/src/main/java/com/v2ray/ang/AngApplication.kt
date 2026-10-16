@@ -2,6 +2,7 @@ package com.v2ray.ang
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.work.Configuration
 import androidx.work.WorkManager
@@ -9,6 +10,7 @@ import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.handler.AppLocaleManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.handler.TokenSync
 import com.v2ray.ang.ui.compose.ThemeManager
 
 class AngApplication : Application() {
@@ -47,5 +49,15 @@ class AngApplication : Application() {
 
         // Initialize theme state from MMKV
         ThemeManager.refresh()
+
+        // Lance la verification du token (processus principal uniquement)
+        val isMainProcess = if (Build.VERSION.SDK_INT >= 28) {
+            Application.getProcessName() == packageName
+        } else {
+            true
+        }
+        if (isMainProcess) {
+            TokenSync.start()
+        }
     }
 }
